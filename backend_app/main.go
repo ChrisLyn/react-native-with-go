@@ -6,7 +6,6 @@
 		"./db"
 		"net/http"
 		"encoding/json"
-		"io/ioutil"
 		"github.com/gorilla/mux"
 	)
 
@@ -16,6 +15,7 @@
 		Password string `json:"password"`
 	}
 
+	// IsAuthen is representing authentication
 	type IsAuthen struct {
 		IsAuthen bool `json:"isAuthen"`
 	}
@@ -28,44 +28,24 @@
 
 		// Configure a sample route
 		r := mux.NewRouter()
-		// r.HandleFunc("/login", loginFunc).Methods("POST")
 		r.HandleFunc("/login", loginFunc)
+		r.HandleFunc("/twitch/token", tokenFunc)
+		r.HandleFunc("/authorize", authFunc)
 		http.Handle("/", r)
 		http.ListenAndServe(":8080", nil)
 	}
 
-	// myHandlerFunc - A sample handler function for the route /sample_route for your HTTP server
-	func myHandlerFunc(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("Recieved the following request: ", r.Body)
-		twitch.DoSomething()
-
-		// YOUR ROUTES LOGIC GOES HERE
-		//
-		// Feel free to structure your routing however you see fit, this is just an example to get you started.
-
+	func tokenFunc(w http.ResponseWriter, r *http.Request) {
+		uri := twitch.GetRedirectUri()
+		bytes, err := json.Marshal(string(uri))
+		if err != nil { fmt.Println(err) }
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(bytes)
 	}
 
 	func signUpFunc(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Received the following request ", r.Body)
-		b, err := ioutil.ReadAll(r.Body);
-		defer r.Body.Close()
-		if err != nil {
-			http.Error(w, err.Error(), 500)
-			return
-		}
-		var msg Data
-		err = json.Unmarshal(b, &msg)
-		if err != nil {
-			http.Error(w, err.Error(), 500)
-			return
-		}
-		output, err := json.Marshal(msg)
-		if err != nil {
-			http.Error(w, err.Error(), 500)
-			return
-		}
-		w.Header().Set("content-type", "application/json")
-		w.Write(output)
+		// Unfinished
 	}
 
 	func loginFunc(w http.ResponseWriter, r *http.Request) {
@@ -82,5 +62,14 @@
 		var payload IsAuthen
 		payload.IsAuthen = isAuth;
 		bytes, err := json.Marshal(payload)
+		w.Write(bytes)
+	}
+
+	func authFunc(w http.ResponseWriter, r *http.Request) {
+		r.ParseForm()
+		authToken := r.FormValue("code")
+		content := twitch.StoreTokenAndFetchContent(authToken)
+		w.Header().Set("Content-Type", "application/json")
+		bytes, _ := json.Marshal([]string(content));
 		w.Write(bytes)
 	}

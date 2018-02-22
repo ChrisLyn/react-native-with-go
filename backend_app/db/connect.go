@@ -51,9 +51,7 @@ func IsAuthenticated(username string, password string)(isAuthenticated bool) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		log.Println(username, password)
 		isAuthenticated = true
 	}
-	// fmt.Println(result);
 	return
 }

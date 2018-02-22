@@ -1,0 +1,7 @@
+{
+    "domain": "https://api.twitch.tv/kraken/oauth2/authorize",
+    "client_id": "6idipjj17vyevdwxa6kci35ai01v43",
+    "redirect_uri": "http://localhost:8080/authorize",
+    "response_type": "code",
+    "scope": "user_read"
+}

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { ScrollView, Text, View, Button, ListView, StyleSheet, TouchableHighlight } from 'react-native';
+import { ScrollView, Text, View, Button, ListView, StyleSheet, TouchableHighlight, WebView, TouchableOpacity } from 'react-native';
 import { logout } from '../../redux/actions/auth';
  
 class Secured extends Component {
@@ -11,26 +11,85 @@ class Secured extends Component {
           rowHasChanged: (r1, r2) => r1 != r2
         });
         this.state = {
-          ds:[
-              {AwayTeam: "TeamA", HomeTeam: "TeamB", Selection: "AwayTeam"},
-              {AwayTeam: "TeamC", HomeTeam: "TeamD", Selection: "HomeTeam"}
-          ],
+          isLoading: true,
+          authorized: false,
+          ds:[],
           dataSource:ds,
+          redirectUri: ""
         }
+        
       }
     
       componentDidMount(){
-        this.setState({
-          dataSource:this.state.dataSource.cloneWithRows(this.state.ds),
-        })
-    
+        fetch("http://localhost:8080/twitch/token")
+        .then(response => response.json())
+        .then(responseData => {
+            this.setState({redirectUri: responseData});
+            this.setState({isLoading: false});
+            
+        });
       }
 
-      pressRow(rowData){
+      render () {
+        if (this.state.isLoading) {
+          return (
+            <View><Text>Loading ...</Text></View>
+          );
+        } else if (!this.state.authorized) {
+            return (
+                <WebView 
+                        source={{uri: this.state.redirectUri}}
+                        javaScriptEnabled = {true}
+                        domStorageEnabled = {true}
+                        onNavigationStateChange={this._onNavigationStateChange.bind(this)}/>
+            );
+        } else if (!this.state.playContent) {
+            return (
+                <View> 
+                    {
+                    this.state.ds.map((item, index) => (
+                        <TouchableOpacity
+                            key = {index}
+                            style = {styles.container}
+                            onPress = {() => this.showContent(item)}>
+                            
+                            <Text style = {styles.text}>
+                                {item}
+                            </Text>
+                        </TouchableOpacity>
+                    ))
+                    }
+                </View>
+            )
+        } else {
+            return (
+                <WebView 
+                source={{uri: this.state.playUrl}}
+                javaScriptEnabled = {true}
+                domStorageEnabled = {true}/>
+            )
+        }
+      }
 
+      _onNavigationStateChange(navState) {
+        //   this.props.onAuthorize(navState.url);
+          fetch(this.state.redirectUri)
+          .then(response => response.json())
+          .then(responseData => {
+            this.setState({ds: responseData});
+            this.setState({authorized: true});
+          })
+    }
+
+    showContent(url) {
+        this.setState({playContent: true});
+        this.setState({playUrl: url});
+    }
+
+      pressRow(rowData){
         var newDs = [];
         newDs = this.state.ds.slice();
-        newDs[0].Selection = newDs[0] == "AwayTeam" ? "HomeTeam" : "AwayTeam";
+        // newDs[0].Selection = newDs[0] == "AwayTeam" ? "HomeTeam" : "AwayTeam";
         this.setState({
           dataSource: this.state.dataSource.cloneWithRows(newDs)
         })
@@ -43,22 +102,14 @@ class Secured extends Component {
             onPress={()=> this.pressRow(rowData)}
             underlayColor = '#ddd'>
             <View style ={styles.row}>
-              <Text style={{fontSize:18}}>{rowData.AwayTeam} @ {rowData.HomeTeam} </Text>
+              <Text style={{fontSize:18}}>abb </Text>
               <View style={{flex:1}}>
-                <Text style={styles.selectionText}>{rowData[rowData.Selection]}</Text>
+                <Text style={styles.selectionText}>abbaab</Text>
               </View>
             </View>
           </TouchableHighlight>
     
         )
-      }
-      render(){
-        return (
-          <ListView
-            dataSource = {this.state.dataSource}
-            renderRow = {this.renderRow.bind(this)}>
-          </ListView>
-        );
       }
 
 
@@ -114,7 +165,7 @@ const mapStateToProps = (state, ownProps) => {
  
 const mapDispatchToProps = (dispatch) => {
     return {
-        onLogout: () => { dispatch(logout()); }
+        onLogout: (url) => { dispatch(logout()); }
     }
 }
  

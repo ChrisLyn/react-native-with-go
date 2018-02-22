@@ -3,7 +3,8 @@ import { LoginService } from '../../service/loginService';
 const defaultState = {
     isLoggedIn: false,
     username: '',
-    password: ''
+    password: '',
+    url: ''
 };
  
 export default function reducer(state = defaultState, action) {
@@ -12,13 +13,15 @@ export default function reducer(state = defaultState, action) {
             return Object.assign({}, state, { 
                 isLoggedIn: true,
                 username: action.username,
-                password: action.password
+                password: action.password,
+                url: ''
             });
         case 'LOGOUT':
             return Object.assign({}, state, { 
                 isLoggedIn: false,
                 username: '',
-                password: ''
+                password: '',
+                url: ''
             });
         default:
             return state;
