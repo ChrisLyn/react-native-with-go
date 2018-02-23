@@ -14,6 +14,7 @@ WORKDIR /app/react-native-with-go/Client/
 RUN npm install -g react-native &&\
     npm install -g react-native-cli &&\
     npm install &&\
+    pwd &&\
     react-native run-ios
 
 # Export port to docker host
