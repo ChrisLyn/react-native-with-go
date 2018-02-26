@@ -19,7 +19,7 @@
 
     Create database: `create database gawkbox;`
     
-    Create table: `create table user(name varchar(20), user varchar(20), role varchar(20));`
+    Create table: `create table user(username varchar(20), password varchar(20), role varchar(20));`
     
     Insert one record: `insert into user ("lin", "admin", "admin_role")`
     
