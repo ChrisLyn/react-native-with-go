@@ -95,8 +95,7 @@ func GetRedirectUri()(url string) {
 }
 
 func StoreTokenAndFetchContent(authToken string)(videoURLs []string) {
-	requestURL := streamURL + "followed"
-	requestURL = "https://api.twitch.tv/kraken/streams"
+	requestURL := "https://api.twitch.tv/kraken/streams"
 	file, err := os.Open("./config/twitch_config.json")
 	if err != nil {  log.Fatal(err) }  
 	var auth AuthUrl

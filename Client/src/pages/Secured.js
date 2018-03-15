@@ -24,9 +24,11 @@ class Secured extends Component {
         fetch("http://localhost:8080/twitch/token")
         .then(response => response.json())
         .then(responseData => {
+            console.log(responseData);
             this.setState({redirectUri: responseData});
             this.setState({isLoading: false});
-            
+        }).catch((error) => {
+            console.error("Error in Mount!!");
         });
       }
 
@@ -41,7 +43,7 @@ class Secured extends Component {
                         source={{uri: this.state.redirectUri}}
                         javaScriptEnabled = {true}
                         domStorageEnabled = {true}
-                        onNavigationStateChange={this._onNavigationStateChange.bind(this)}/>
+                        onNavigationStateChange={(event) => this._onNavigationStateChange(event)}/>
             );
         } else if (!this.state.playContent) {
             return (
@@ -72,13 +74,16 @@ class Secured extends Component {
       }
 
       _onNavigationStateChange(navState) {
-        //   this.props.onAuthorize(navState.url);
+        if (navState.canGoBack) {
           fetch(this.state.redirectUri)
           .then(response => response.json())
           .then(responseData => {
             this.setState({ds: responseData});
             this.setState({authorized: true});
-          })
+          }).catch((error) => {
+            console.error("Error in Navi!!");
+          });
+        }
     }
 
     showContent(url) {
